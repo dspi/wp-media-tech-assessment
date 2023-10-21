@@ -15,7 +15,7 @@
  * Author URI: https://www.linkedin.com/in/spill/
  */
 
-namespace DSPI\ROCKET_WP_CRAWLER;
+namespace DSPI_ROCKET_WP_CRAWLER;
 
 define( 'ROCKET_CRWL_PLUGIN_FILENAME', __FILE__ ); // Filename of the plugin, including the file.
 
