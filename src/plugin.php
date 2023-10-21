@@ -2,13 +2,13 @@
 /**
  * Plugin main class
  *
- * @package     TO FILL
- * @since       TO FILL
- * @author      Mathieu Lamiot
+ * @package     tech-assessment
+ * @since       1.0.0
+ * @author      David Spiller
  * @license     GPL-2.0-or-later
  */
 
-namespace ROCKET_WP_CRAWLER;
+namespace DSPI\ROCKET_WP_CRAWLER;
 
 /**
  * Main plugin class. It manages initialization, install, and activations.
