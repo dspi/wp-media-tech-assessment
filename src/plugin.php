@@ -90,6 +90,10 @@ class Rocket_Wpc_Plugin_Class {
 		if ( ! current_user_can( 'activate_plugins' ) ) {
 			return;
 		}
+
+		// Initialize DB Table
+		self::initialize_db_table();
+
 		$plugin = isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : '';
 		check_admin_referer( "activate-plugin_{$plugin}" );
 	}
@@ -139,6 +143,44 @@ class Rocket_Wpc_Plugin_Class {
 	 */
 	public function get_version() {
 		return $this->version;
+	}
+
+	/**
+	 * Initializes the plugin database table.
+	 *
+	 * @since     1.0.0
+	 * @return    void
+	 */
+	private static function initialize_db_table() {
+
+		// WP Globals
+		global $table_prefix, $wpdb;
+
+		$crawler_db_table = $table_prefix . ROCKET_CRWL_PLUGIN_NAME; //wp_crawler-plugin;
+
+		// Create Customer Table if not exist
+		if( $wpdb->get_var( "show tables like '$crawler_db_table'" ) != $crawler_db_table ) {
+
+			// Query - Create Table
+			$sql = "START TRANSACTION;";
+			$sql .= "DROP TABLE IF EXISTS `$crawler_db_table`;";
+			$sql .= "CREATE TABLE IF NOT EXISTS `$crawler_db_table` (";
+			$sql .= "`crawl_id` int NOT NULL AUTO_INCREMENT, ";
+			$sql .= "`crawl_date` bigint NOT NULL, ";
+			$sql .= "`crawl_result` json DEFAULT NULL, ";
+			$sql .= "PRIMARY KEY (`crawl_id`), ";
+			$sql .= "UNIQUE KEY `crawl_id` (`crawl_id`) ";
+			$sql .= ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+			$sql .= "COMMIT;";
+
+
+			// Include Upgrade Script
+			require_once( ABSPATH . '/wp-admin/includes/upgrade.php' );
+
+			// Create Table
+			dbDelta( $sql );
+		}
+
 	}
 
 	/**
