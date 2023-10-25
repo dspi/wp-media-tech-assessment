@@ -148,6 +148,9 @@ class Rocket_Wpc_Plugin_Class {
 	 * @access   private
 	 */
 	private function define_admin_hooks() {
-		new \DSPI_ROCKET_WP_CRAWLER\Admin\Plugin_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new \DSPI_ROCKET_WP_CRAWLER\Admin\Plugin_Admin( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+
 	}
 }

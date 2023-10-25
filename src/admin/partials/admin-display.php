@@ -16,14 +16,14 @@ namespace DSPI_ROCKET_WP_CRAWLER\Admin;
 ?>
 
 <div class="wrap">
-
-		        <h2>Internal Crawler</h2>
-
-
-		            <?php
-		                settings_fields( 'admin_page_general_settings' );
-		                do_settings_sections( 'admin_page_general_settings' );
-		            ?>
-
-
+	<h2>Internal Crawler</h2>
+	<?php settings_errors(); ?>
+	<!-- <form method="POST" action="options.php"> -->
+	<form method="POST" action="options.php" id="crawl-form" data-action="crawl_now">
+		<?php
+			settings_fields( 'admin_page_general_settings' );
+			do_settings_sections( 'admin_page_general_settings' );
+		?>
+		<?php submit_button('Crawl Now'); ?>
+	</form>
 </div>
