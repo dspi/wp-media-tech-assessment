@@ -45,6 +45,10 @@ class Plugin_Admin {
 		add_action('admin_menu', array( $this, 'addPluginAdminMenuToSettings' ), 10);
 		add_action('admin_init', array( $this, 'registerAndBuildFields' ));
 
+		//permissions check
+		if ( current_user_can( 'manage_options' ) ) {
+			add_action('wp_ajax_crawl_now_ajax_hook', array( $this, 'runCrawlerCallback'));
+		}
 	}
 
 	/**
@@ -53,13 +57,32 @@ class Plugin_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_name.'-custom-scripts', plugin_dir_url( __FILE__ ) . 'js/plugin-admin.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name.'-custom-scripts', plugin_dir_url( __FILE__ ) . 'js/plugin-admin.js', array( 'jquery' ), $this->version, true );
 
 		if ( current_user_can('manage_options')) {
 			// Pass the WordPress AJAX URL to the script
-			//wp_localize_script($this->plugin_name.'-custom-scripts', 'ajax_object', array('ajax_url' => plugin_dir_url( __FILE__ ) .'partials/admin-display.php'));
-			wp_localize_script($this->plugin_name.'-custom-scripts', 'ajax_object', array('ajax_url' => plugin_dir_url( __FILE__ ) .'crawler/CrawlRequestHandler.php'));
+			wp_localize_script($this->plugin_name.'-custom-scripts', 'ajax_object', array(
+				'ajax_url'          => admin_url( 'admin-ajax.php' ),
+				'ajax_nonce' => wp_create_nonce( 'nonce_action_crawler' )
+			));
 		}
+	}
+
+	public function runCrawlerCallback($data){
+		if( ! wp_verify_nonce($_POST['_ajax_nonce'], 'nonce_action_crawler') ) die();
+
+		if ( current_user_can( 'manage_options' ) ) {
+			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/crawler/CrawlRequestHandler.php';
+		}
+
+		$handler = new \DSPI_ROCKET_WP_CRAWLER\Admin\Crawler\Crawl_Request_Handler();
+		$crawl_result = $handler->crawl();
+
+		//Data to pass back to the front end
+		wp_send_json_success( array(
+			'my_data' => $crawl_result,
+			'data_received_from_js' => $_POST
+		));
 	}
 
 	public function addPluginAdminMenuToSettings(){

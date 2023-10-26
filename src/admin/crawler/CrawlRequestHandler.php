@@ -2,12 +2,20 @@
 /**
  * Handles Crawl Requests
  *
- * @package     TechAssessment
+ * @since      1.0.0
+ *
+ * @package    tech-assessment
+ * @subpackage tech-assessment/admin
  */
 
-namespace DSPILLER\ROCKET_WP_CRAWLER\Admin\Crawler;
+namespace DSPI_ROCKET_WP_CRAWLER\Admin\Crawler;
 
-//TODO: Implement insert_crawl_results() method.
-echo 'Dummy result returned from Crawl_Request_Handler.';
+class Crawl_Request_Handler {
+
+	//TODO: Implement crawl() and insert_crawl_results() methods.
+	public function crawl(){
+		return 'Dummy result returned from Crawl_Request_Handler.';
+	}
+}
 
 ?>
