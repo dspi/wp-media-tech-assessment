@@ -7,7 +7,7 @@
 	git clone git@github.com:dspi/wp-media-tech-assessment.git
 	```
 
-1. Run composer install
+1. Run `composer install`
 
 1. Activate the plugin, named **Tech Assessment - David Spiller** from the *Admin > Plugins* menu.
 
