@@ -1,5 +1,7 @@
 # Explanation
 
+> Please bear in mind that WordPress is completely new to me, and that I attempted to produce a self-contained Wordpress plugin only.
+
 ## The problem to be solved in your own words.
 An administrator needs the functionality to trigger an immediate refresh of a sitemap of internal links on a site after the plugin is installed, and that the plugin should perform regular (hourly) updates itself after that.
 
@@ -31,6 +33,17 @@ My overall idea was to
 There are parts of the assessment specification that I have not yet completed.  I hope to get to more of these soon, and I will update this repository accordingly.
 
 I hope that the work I've done give some indication of my ability and understanding, even if its not fully complete yet.
+
+## Incomplete work
+#### Wordpress
+- I have spent some time trying to understand the best/correct way to add **dynamic html pages** to Wordpress, but haven't got there yet.  As a result, I have not produced the sitemap.html or homepage.html files.
+
+- I understand that Wordpress has a built-in pseudo-cron functionality, which I attempted to use to trigger the automatic crawl, but didn't get it quite right.
+
+#### PHP
+- I have spent some time trying configuring **PHPCS** and linting (something I've only done before in Typescript), but did not complete, so please excuse all the style/convention mismatches.
+
+
 
 ## How your solution achieves the admin’s desired outcome per the user story
 
