@@ -1,15 +1,17 @@
 <?php
+
+namespace DSPI_ROCKET_WP_CRAWLER\Admin\Crawler;
+
+require_once plugin_dir_path( dirname( __FILE__ ) ) . 'crawler/Crawler.php';
+
 /**
  * Handles Crawl Requests
  *
  * @since      1.0.0
  *
  * @package    tech-assessment
- * @subpackage tech-assessment/admin
+ * @subpackage tech-assessment/admin/crawler
  */
-
-namespace DSPI_ROCKET_WP_CRAWLER\Admin\Crawler;
-
 class Crawl_Request_Handler {
 
 	/**
@@ -20,9 +22,12 @@ class Crawl_Request_Handler {
 	 * @return mixed|false	The crawl results, or false on error.
 	 */
 	public function crawl(){
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'crawler/Crawler.php';
+		$wordpress_home_url = get_home_url();
 
-		$crawler = new \DSPI_ROCKET_WP_CRAWLER\Admin\Crawler\Crawler(get_home_url());
+		$curl = new CurlWrapper();
+		$htmlDomParser = new HTMLParser();
+		$crawler = new Crawler($wordpress_home_url, $curl, $htmlDomParser);
+
 		$internalLinks = $crawler->scrapeInternalLinksRecursively();
 		sort($internalLinks);
 

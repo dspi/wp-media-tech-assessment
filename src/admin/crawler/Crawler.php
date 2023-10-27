@@ -1,27 +1,35 @@
 <?php
+
+namespace DSPI_ROCKET_WP_CRAWLER\Admin\Crawler;
+
+use voku\helper\HtmlDomParser;
+
 /**
  * Crawler Class
  *
  * @since      1.0.0
  *
  * @package    tech-assessment
- * @subpackage tech-assessment/admin
+ * @subpackage tech-assessment/admin/crawler
+ *
+ * @param $url string The url to crawl.
+ * @param $curl CurlWrapper A Curl wrapper object providing limited curl functionality.
+ * @param $htmlDomParser HTMLParser A HtmlDomParser object providing limited html functionality.
  */
-
-namespace DSPI_ROCKET_WP_CRAWLER\Admin\Crawler;
-
-const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36";
-
-use voku\helper\HtmlDomParser;
-
 class Crawler {
 
+	private $internalLinks = [];
+	private $baseUrl;
     private $url;
-    public $baseUrl;
-    private $internalLinks = [];
+	private $curl;
+	private $htmlParser;
 
-    function __construct($url) {
+
+    function __construct($url, $curl, $htmlParser) {
         $this->url = $url;
+		$this->curl = $curl;
+		$this->htmlParser = $htmlParser;
+
         $sourceUrl = parse_url($this->url);
         $this->baseUrl = $sourceUrl['scheme'] . '://' . $sourceUrl['host'];
     }
@@ -40,8 +48,8 @@ class Crawler {
         $page = $this->getPage($scrape_url);
 		$html = $page['html'];
 
-        $htmlDomParser = HtmlDomParser::str_get_html($html);
-        $linkElements = $htmlDomParser->find("a");
+		$parser = $this->htmlParser->get_parser($html);
+        $linkElements = $parser->find("a");
 
         foreach ($linkElements as $linkElement) {
             $link = $linkElement->getAttribute("href");
@@ -55,12 +63,19 @@ class Crawler {
             ) {
                 $trim_link = explode('?', $link)[0];
                 array_push($this->internalLinks, $trim_link);
-                $this->scrapeInternalLinksRecursively($trim_link);
+                //$this->scrapeInternalLinksRecursively($trim_link);
+				$this->recursiveHelper($trim_link);
             }
         }
 
 		return $this->internalLinks;
     }
+
+	//Instead of scrapeInternalLinksRecursively calling itself, making it difficult to test,
+	//this helper does that job.
+	private function recursiveHelper($link) {
+		$this->scrapeInternalLinksRecursively($link);
+	}
 
 	/**
 	 * Gets html page content using curl.
@@ -72,24 +87,57 @@ class Crawler {
 	 * @return array		The fetched results
 	 */
     public function getPage($url) {
+		return $this->curl->exec_curl($url);
+    }
+}
+
+
+
+/**
+ * Curl Wrapper Class providing limited curl functionality, and allowing for easier testing.
+ *
+ * @since      1.0.0
+ *
+ * @package    tech-assessment
+ * @subpackage tech-assessment/admin/crawler
+ */
+class CurlWrapper {
+
+	public function exec_curl($url) {
+		$user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36';
 		$res = [];
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_USERAGENT, USER_AGENT);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
 
-		$res['html'] = curl_exec($curl);
+		$res['html'] = curl_exec($ch);
 
-		if (!curl_errno($curl)) {
-			$res['resp'] = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+		if (!curl_errno($ch)) {
+			$res['resp'] = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		}
 		else{
-			$res['resp'] = curl_strerror(curl_errno($curl));
+			$res['resp'] = curl_strerror(curl_errno($ch));
 		}
 
-        curl_close($curl);
+        curl_close($ch);
 
 		return $res;
-    }
+	}
+}
+
+/**
+ * A HtmlDomParser Class providing limited functionality, and allowing for easier testing.
+ *
+ * @since      1.0.0
+ *
+ * @package    tech-assessment
+ * @subpackage tech-assessment/admin/crawler
+ */
+class HTMLParser extends HtmlDomParser {
+
+	public static function get_parser($html){
+		return parent::str_get_html($html);
+	}
 }
