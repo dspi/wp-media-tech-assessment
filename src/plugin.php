@@ -8,7 +8,7 @@
  * @license     GPL-2.0-or-later
  */
 
-namespace DSPI_ROCKET_WP_CRAWLER;
+namespace ROCKET_WP_CRAWLER;
 
 /**
  * Main plugin class. It manages initialization, install, and activations.
@@ -49,11 +49,13 @@ class Rocket_Wpc_Plugin_Class {
 	 */
 	public function __construct() {
 		$this->plugin_name = ROCKET_CRWL_PLUGIN_NAME;
-		$this->version = ROCKET_CRWL_PLUGIN_VERSION;
+		$this->version     = ROCKET_CRWL_PLUGIN_VERSION;
 
 		$this->load_dependencies();
 
 		$this->define_admin_hooks();
+
+		$this->define_public_hooks();
 
 		// Register plugin lifecycle hooks.
 		register_deactivation_hook( ROCKET_CRWL_PLUGIN_FILENAME, array( $this, 'wpc_deactivate' ) );
@@ -68,12 +70,15 @@ class Rocket_Wpc_Plugin_Class {
 	 *
 	 * @return void
 	 */
-	private function load_dependencies(){
+	private function load_dependencies() {
 		// Plugin_Loader. Orchestrates the hooks of the plugin.
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'src/plugin-loader.php';
+		require_once plugin_dir_path( __DIR__ ) . 'src/plugin-loader.php';
 
 		// Plugin_Admin. Defines all hooks for the admin area.
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'src/admin/plugin-admin.php';
+		require_once plugin_dir_path( __DIR__ ) . 'src/admin/plugin-admin.php';
+
+		// Plugin_Public. Defines all hooks for the public area.
+		require_once plugin_dir_path( __DIR__ ) . 'src/public/plugin-public.php';
 
 		// Settings_Page_Public. Defines all hooks for the public area.
 
@@ -91,7 +96,7 @@ class Rocket_Wpc_Plugin_Class {
 			return;
 		}
 
-		// Initialize DB Table
+		// Initialize DB Table.
 		self::initialize_db_table();
 
 		$plugin = isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : '';
@@ -153,34 +158,33 @@ class Rocket_Wpc_Plugin_Class {
 	 */
 	private static function initialize_db_table() {
 
-		// WP Globals
+		// WP Globals.
 		global $table_prefix, $wpdb;
 
-		$crawler_db_table = $table_prefix . ROCKET_CRWL_PLUGIN_NAME; //wp_crawler-plugin;
+		$crawler_db_table = $table_prefix . ROCKET_CRWL_PLUGIN_NAME; // wp_crawler-plugin.
 
-		// Create Customer Table if not exist
-		if( $wpdb->get_var( "show tables like '$crawler_db_table'" ) != $crawler_db_table ) {
+		// Create Customer Table if not exist.
+		// if ( $wpdb->get_var( "SHOW TABLES LIKE '$crawler_db_table'" ) != $crawler_db_table ) {.
+		$exists = $wpdb->get_results( $wpdb->prepare( 'SHOW TABLES LIKE %s', $crawler_db_table ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		if ( ! $exists ) {
 
-			// Query - Create Table
-			$sql = "START TRANSACTION;";
-			$sql .= "DROP TABLE IF EXISTS `$crawler_db_table`;";
+			// Query - Create Table.
+			$sql  = 'START TRANSACTION;';
 			$sql .= "CREATE TABLE IF NOT EXISTS `$crawler_db_table` (";
-			$sql .= "`crawl_id` int NOT NULL AUTO_INCREMENT, ";
-			$sql .= "`crawl_date` bigint NOT NULL, ";
-			$sql .= "`crawl_result` json DEFAULT NULL, ";
-			$sql .= "PRIMARY KEY (`crawl_id`), ";
-			$sql .= "UNIQUE KEY `crawl_id` (`crawl_id`) ";
-			$sql .= ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
-			$sql .= "COMMIT;";
+			$sql .= '`crawl_id` int NOT NULL AUTO_INCREMENT, ';
+			$sql .= '`crawl_date` bigint NOT NULL, ';
+			$sql .= '`crawl_result` json DEFAULT NULL, ';
+			$sql .= 'PRIMARY KEY (`crawl_id`), ';
+			$sql .= 'UNIQUE KEY `crawl_id` (`crawl_id`) ';
+			$sql .= ') ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;';
+			$sql .= 'COMMIT;';
 
+			// Include Upgrade Script.
+			require_once ABSPATH . '/wp-admin/includes/upgrade.php';
 
-			// Include Upgrade Script
-			require_once( ABSPATH . '/wp-admin/includes/upgrade.php' );
-
-			// Create Table
+			// Create Table.
 			dbDelta( $sql );
 		}
-
 	}
 
 	/**
@@ -190,9 +194,18 @@ class Rocket_Wpc_Plugin_Class {
 	 * @access   private
 	 */
 	private function define_admin_hooks() {
-		$plugin_admin = new \DSPI_ROCKET_WP_CRAWLER\Admin\Plugin_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new \ROCKET_WP_CRAWLER\Admin\Plugin_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+	}
 
+	/**
+	 * Register all of the hooks related to public
+	 *
+	 * @access   private
+	 */
+	private function define_public_hooks() {
+
+		$plugin_public = new \ROCKET_WP_CRAWLER\Public\Plugin_Public( $this->get_plugin_name(), $this->get_version() );
 	}
 }

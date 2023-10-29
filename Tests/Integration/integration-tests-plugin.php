@@ -8,7 +8,7 @@
  * @license     GPL-2.0-or-later
  */
 
-namespace DSPI_ROCKET_WP_CRAWLER;
+namespace ROCKET_WP_CRAWLER;
 
 require_once dirname(dirname(__DIR__)) . "/plugin.php";
 

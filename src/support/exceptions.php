@@ -8,7 +8,7 @@
  * @license     GPL-2.0-or-later
  */
 
-namespace DSPI_ROCKET_WP_CRAWLER;
+namespace ROCKET_WP_CRAWLER;
 
 // Automatically added when writing the WHOOPS section below to find the whoops functions.
 use Whoops\Handler\PrettyPageHandler;

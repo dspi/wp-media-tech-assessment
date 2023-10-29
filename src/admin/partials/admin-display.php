@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Provide a admin area view for the plugin
  *
@@ -11,7 +10,7 @@
  * @subpackage PluginName/admin/partials
  */
 
-namespace DSPI_ROCKET_WP_CRAWLER\Admin;
+namespace ROCKET_WP_CRAWLER\Admin;
 
 ?>
 
@@ -23,6 +22,6 @@ namespace DSPI_ROCKET_WP_CRAWLER\Admin;
 			settings_fields( 'admin_page_general_settings' );
 			do_settings_sections( 'admin_page_general_settings' );
 		?>
-		<?php submit_button('Crawl Now'); ?>
+		<?php submit_button( 'Crawl Now' ); ?>
 	</form>
 </div>

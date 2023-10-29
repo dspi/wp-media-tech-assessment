@@ -1,6 +1,6 @@
 <?php
 
-namespace DSPI_ROCKET_WP_CRAWLER\Admin\Crawler;
+namespace ROCKET_WP_CRAWLER\Admin\Crawler;
 
 use voku\helper\HtmlDomParser;
 
@@ -11,133 +11,101 @@ use voku\helper\HtmlDomParser;
  *
  * @package    tech-assessment
  * @subpackage tech-assessment/admin/crawler
- *
- * @param $url string The url to crawl.
- * @param $curl CurlWrapper A Curl wrapper object providing limited curl functionality.
- * @param $htmlDomParser HTMLParser A HtmlDomParser object providing limited html functionality.
  */
 class Crawler {
 
-	private $internalLinks = [];
-	private $baseUrl;
-    private $url;
-	private $curl;
-	private $htmlParser;
+	/**
+	 * The array of internal links found.
+	 *
+	 * @var array
+	 */
+	public $internal_links = array();
 
+	/**
+	 * The base url.
+	 *
+	 * @var string
+	 */
+	private $base_url;
 
-    function __construct($url, $curl, $htmlParser) {
-        $this->url = $url;
-		$this->curl = $curl;
-		$this->htmlParser = $htmlParser;
+	/**
+	 * The url to crawl.
+	 *
+	 * @var string
+	 */
+	private $url;
 
-        $sourceUrl = parse_url($this->url);
-        $this->baseUrl = $sourceUrl['scheme'] . '://' . $sourceUrl['host'];
-    }
+	/**
+	 * The remote_get object.
+	 *
+	 * @var object
+	 */
+	private $remote_get;
+
+	/**
+	 * The Crawler object.
+	 *
+	 * @since     1.0.0
+	 *
+	 * @param string $url string The url to crawl.
+	 *
+	 * @param object $remote_get RemoteGetWrapper A remote_get wrapper object providing limited remote_get functionality.
+	 */
+	public function __construct( $url, $remote_get ) {
+		$this->url        = $url;
+		$this->remote_get = $remote_get;
+
+		$source_url     = wp_parse_url( $this->url );
+		$this->base_url = $source_url['scheme'] . '://' . $source_url['host'];
+	}
 
 	/**
 	 * Recursively scrapes the given url for  internal links.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param string $url	The url to crawl.
+	 * @param string $url The url to crawl.
 	 *
-	 * @return array		The crawl results
+	 * @return array The crawl results
 	 */
-    public function scrapeInternalLinksRecursively($url = null) {
-        $scrape_url = $url == null ? $this->url : $url;
-        $page = $this->getPage($scrape_url);
-		$html = $page['html'];
+	public function scrape_internal_links_recursively( $url = null ) {
+		$scrape_url = null === $url ? $this->url : $url;
+		$page       = $this->remote_get->remote_get( $scrape_url );
+		if ( isset( $page['html'] ) ) {
+			$html = $page['html'];
+		} else {
+			return;
+		}
 
-		$parser = $this->htmlParser->get_parser($html);
-        $linkElements = $parser->find("a");
+		$html_dom_parser = HtmlDomParser::str_get_html( $html );
+		$link_elements   = $html_dom_parser->find( 'a' );
 
-        foreach ($linkElements as $linkElement) {
-            $link = $linkElement->getAttribute("href");
-            //trim and filter duplicates, external links & admin links
-           if (
-               	!in_array($link, $this->internalLinks)
-               	&& str_starts_with($link, $this->baseUrl) //internal
-				&& !str_contains($link, '/wp-admin') //no admin
-				&& !str_contains($link, '/#') //no page anchors
-				&& !str_contains($link, '?') //no parameters
-            ) {
-                $trim_link = explode('?', $link)[0];
-                array_push($this->internalLinks, $trim_link);
-                //$this->scrapeInternalLinksRecursively($trim_link);
-				$this->recursiveHelper($trim_link);
-            }
-        }
+		foreach ( $link_elements as $link_elements ) {
+			$link = $link_elements->getAttribute( 'href' );
+			// Trim and filter duplicates, external links & admin links.
+			if (
+				! in_array( $link, $this->internal_links, true )
+				&& str_starts_with( $link, $this->base_url ) // internal.
+				&& ! str_contains( $link, '/wp-admin' ) // no admin.
+				&& ! str_contains( $link, '/#' ) // no page anchors.
+				&& ! str_contains( $link, '?' ) // no parameters.
+			) {
+				$trim_link = explode( '?', $link )[0];
+				array_push( $this->internal_links, $trim_link );
+				$this->recursive_helper( $trim_link );
+			}
+		}
 
-		return $this->internalLinks;
-    }
-
-	//Instead of scrapeInternalLinksRecursively calling itself, making it difficult to test,
-	//this helper does that job.
-	private function recursiveHelper($link) {
-		$this->scrapeInternalLinksRecursively($link);
+		return $this->internal_links;
 	}
 
 	/**
-	 * Gets html page content using curl.
+	 * Instead of scrape_internal_links_recursively calling itself, making it difficult to test,
+	 * This helper does that job.
 	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $url	The url of the page to fetch.
-	 *
-	 * @return array		The fetched results
+	 * @param string $link The recursively obtained link.
 	 */
-    public function getPage($url) {
-		return $this->curl->exec_curl($url);
-    }
-}
-
-
-
-/**
- * Curl Wrapper Class providing limited curl functionality, and allowing for easier testing.
- *
- * @since      1.0.0
- *
- * @package    tech-assessment
- * @subpackage tech-assessment/admin/crawler
- */
-class CurlWrapper {
-
-	public function exec_curl($url) {
-		$user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36';
-		$res = [];
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
-
-		$res['html'] = curl_exec($ch);
-
-		if (!curl_errno($ch)) {
-			$res['resp'] = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-		}
-		else{
-			$res['resp'] = curl_strerror(curl_errno($ch));
-		}
-
-        curl_close($ch);
-
-		return $res;
-	}
-}
-
-/**
- * A HtmlDomParser Class providing limited functionality, and allowing for easier testing.
- *
- * @since      1.0.0
- *
- * @package    tech-assessment
- * @subpackage tech-assessment/admin/crawler
- */
-class HTMLParser extends HtmlDomParser {
-
-	public static function get_parser($html){
-		return parent::str_get_html($html);
+	private function recursive_helper( $link ) {
+		$this->scrape_internal_links_recursively( $link );
 	}
 }

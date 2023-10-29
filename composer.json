@@ -13,8 +13,7 @@
     ],
     "require"       : {
         "php" : ">=7.3",
-		"voku/simple_html_dom": "^4.8",
-        "ext-curl": "*"
+		"voku/simple_html_dom": "^4.8"
     },
     "require-dev":{
         "raveren/kint": "~1.0",

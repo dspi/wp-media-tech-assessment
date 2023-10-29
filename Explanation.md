@@ -40,10 +40,6 @@ I hope that the work I've done give some indication of my ability and understand
 
 - I understand that Wordpress has a built-in pseudo-cron functionality, which I attempted to use to trigger the automatic crawl, but didn't get it quite right.
 
-#### PHP
-- I have spent some time trying configuring **PHPCS** and linting (something I've only done before in Typescript), but did not complete, so please excuse all the style/convention mismatches.
-
-
 
 ## How your solution achieves the admin’s desired outcome per the user story
 

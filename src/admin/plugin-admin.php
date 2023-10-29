@@ -1,4 +1,5 @@
 <?php
+// @codingStandardsIgnoreStart
 
 /**
  * The admin-specific functionality of the plugin.
@@ -9,7 +10,7 @@
  * @subpackage tech-assessment/admin
  */
 
-namespace DSPI_ROCKET_WP_CRAWLER\Admin;
+namespace ROCKET_WP_CRAWLER\Admin;
 
 class Plugin_Admin {
 
@@ -75,7 +76,7 @@ class Plugin_Admin {
 			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/crawler/CrawlRequestHandler.php';
 		}
 
-		$handler = new \DSPI_ROCKET_WP_CRAWLER\Admin\Crawler\Crawl_Request_Handler();
+		$handler = new \ROCKET_WP_CRAWLER\Admin\Crawler\CrawlRequestHandler();
 		$crawl_result = $handler->crawl();
 
 		//Data to pass back to the front end

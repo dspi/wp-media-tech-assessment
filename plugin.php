@@ -15,10 +15,10 @@
  * Author URI: https://www.linkedin.com/in/spill/
  */
 
-namespace DSPI_ROCKET_WP_CRAWLER;
+namespace ROCKET_WP_CRAWLER;
 
 define( 'ROCKET_CRWL_PLUGIN_FILENAME', __FILE__ ); // Filename of the plugin, including the file.
-define( 'ROCKET_CRWL_PLUGIN_NAME','crawler-plugin');
+define( 'ROCKET_CRWL_PLUGIN_NAME', 'crawler-plugin' );
 define( 'ROCKET_CRWL_PLUGIN_VERSION', '1.0.0' );
 
 if ( ! defined( 'ABSPATH' ) ) { // If WordPress is not loaded.

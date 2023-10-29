@@ -7,7 +7,7 @@
  * @author      David Spiller
  * @license     GPL-2.0-or-later
  */
-namespace DSPI_ROCKET_WP_CRAWLER;
+namespace ROCKET_WP_CRAWLER;
 
 use WPMedia\PHPUnit\Unit\TestCase;
 
