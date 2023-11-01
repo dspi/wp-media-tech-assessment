@@ -74,6 +74,11 @@ class Crawler {
 		$page       = $this->remote_get->remote_get( $scrape_url );
 		if ( isset( $page['html'] ) ) {
 			$html = $page['html'];
+
+			// Save homepage if its just been scraped.
+			if ( get_home_url() === $scrape_url ) {
+				$this->save_html_homepage( $page['html'] );
+			}
 		} else {
 			return;
 		}
@@ -108,5 +113,24 @@ class Crawler {
 	 */
 	private function recursive_helper( $link ) {
 		$this->scrape_internal_links_recursively( $link );
+	}
+
+	/**
+	 * Saves the html page to the server.
+	 *
+	 * @param string $html The html page to save.
+	 */
+	public function save_html_homepage( $html ) {
+		global $wp_filesystem;
+		if ( empty( $wp_filesystem ) ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		$dirs      = wp_upload_dir();
+		$path      = $dirs['basedir']; // /path/to/wordpress/wp-content/uploads
+		$file_path = $path . '/homepage.html';
+
+		$wp_filesystem->put_contents( $file_path, $html );
 	}
 }
