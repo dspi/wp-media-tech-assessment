@@ -75,10 +75,15 @@ class CrawlRequestHandlerTest extends TestCase {
 
 		$handler    = new CrawlRequestHandler();
 		$testResult = $handler->crawl('http://localhost/00_learn/php-wordpress-dev/wordpress/', $mockRemoteGetCurl, $mockDatabaseHandler);
+		$testResult2 = $handler->crawl('http://localhost/00_learn/php-wordpress-dev/wordpress/', $mockRemoteGetCurl2, $mockDatabaseHandler);
+
 
 		$exp_res = '["http:\/\/localhost\/00_learn\/php-wordpress-dev\/wordpress\/"]';
+		$exp_res2 = '["http:\/\/localhost\/00_learn\/php-wordpress-dev\/wordpress\/", "http:\/\/localhost\/00_learn\/php-wordpress-dev\/wordpress\/blog\/"]';
 
 		$this->assertEquals($exp_res, $testResult);
+		$this->assertEquals($exp_res2, $testResult2);
+
 
 	}
 

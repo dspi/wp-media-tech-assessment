@@ -31,7 +31,7 @@ class CrawlRequestHandler {
 
 		$crawler = new Crawler( $url_to_crawl, $remote_get_wrapper );
 
-		$internal_links = $crawler->scrape_internal_links_recursively();
+		$internal_links = $crawler->scrape_internal_links_recursively( $url_to_crawl );
 		sort( $internal_links );
 
 		$crawl_result = wp_json_encode( $internal_links );
