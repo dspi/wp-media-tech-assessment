@@ -55,10 +55,7 @@ class Crawler {
 		$this->url        = $url;
 		$this->remote_get = $remote_get;
 
-		// Just a workaround for testing that cannot find 'wp_parse_url()':
-		// $source_url     = wp_parse_url( $this->url );
-		$source_url     = parse_url( $this->url );
-
+		$source_url = wp_parse_url( $this->url );
 
 		$this->base_url = $source_url['scheme'] . '://' . $source_url['host'];
 	}
