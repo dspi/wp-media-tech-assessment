@@ -4,6 +4,7 @@ namespace ROCKET_WP_CRAWLER\Admin\Crawler;
 
 require_once plugin_dir_path( __DIR__ ) . 'crawler/RemoteGetWrapper.php';
 require_once plugin_dir_path( __DIR__ ) . 'crawler/Crawler.php';
+require_once plugin_dir_path( __DIR__ ) . 'crawler/DatabaseHandler.php';
 
 /**
  * Handles Crawl Requests
@@ -18,23 +19,24 @@ class CrawlRequestHandler {
 	/**
 	 * Crawls the internal links from this url.
 	 *
-	 * @since 1.0.0
+	 * @since 1.0
+	 *
+	 * @param string $url_to_crawl The url to crawl.
+	 * @param object $remote_get_wrapper The wp_remote_get wrapper.
+	 * @param object $db_handler The database handler.
 	 *
 	 * @return mixed|false  The crawl results, or false on error.
 	 */
-	public function crawl() {
-		$wordpress_home_url = get_home_url();
+	public function crawl( $url_to_crawl, $remote_get_wrapper, $db_handler ) {
 
-		$remote_get = new RemoteGetWrapper();
-
-		$crawler = new Crawler( $wordpress_home_url, $remote_get );
+		$crawler = new Crawler( $url_to_crawl, $remote_get_wrapper );
 
 		$internal_links = $crawler->scrape_internal_links_recursively();
 		sort( $internal_links );
 
 		$crawl_result = wp_json_encode( $internal_links );
 
-		if ( $this->insert_crawl_results( time(), $crawl_result ) ) {
+		if ( $db_handler->insert_crawl_results( time(), $crawl_result ) ) {
 			return $crawl_result;
 		}
 
@@ -51,7 +53,7 @@ class CrawlRequestHandler {
 	 *
 	 * @return int|false The number of rows inserted, or false on error.
 	 */
-	private function insert_crawl_results( $crawl_date, $crawl_result ) {
+	public function insert_crawl_results_old( $crawl_date, $crawl_result ) {
 		global $table_prefix, $wpdb;
 		$crawler_db_table = $table_prefix . ROCKET_CRWL_PLUGIN_NAME; // wp_crawler_plugin.
 

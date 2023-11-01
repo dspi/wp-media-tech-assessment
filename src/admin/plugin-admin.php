@@ -77,7 +77,10 @@ class Plugin_Admin {
 		}
 
 		$handler = new \ROCKET_WP_CRAWLER\Admin\Crawler\CrawlRequestHandler();
-		$crawl_result = $handler->crawl();
+		$remote_get_wrapper = new \ROCKET_WP_CRAWLER\Admin\Crawler\RemoteGetWrapper();
+		$db_handler = new \ROCKET_WP_CRAWLER\Admin\Crawler\DatabaseHandler();
+		$wordpress_home_url = get_home_url();
+		$crawl_result       = $handler->crawl( $wordpress_home_url, $remote_get_wrapper, $db_handler );
 
 		//Data to pass back to the front end
 		wp_send_json_success( array(
