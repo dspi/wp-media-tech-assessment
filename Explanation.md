@@ -37,8 +37,12 @@ I hope that the work I've done give some indication of my ability and understand
 ## Incomplete work
 #### Wordpress
 - I have spent some time trying to understand the best/correct way to add **dynamic html pages** to Wordpress, but haven't got there yet.  As a result, I have not produced the sitemap.html or homepage.html files.
+- I have added a method to save the homepage.html file to the server, however I'm missing some Wordpress magic to get it working properly.
+
 
 - I understand that Wordpress has a built-in pseudo-cron functionality, which I attempted to use to trigger the automatic crawl, but didn't get it quite right.
+
+- I have added a test, (but it is failing at the moment!)
 
 
 ## How your solution achieves the admin’s desired outcome per the user story
